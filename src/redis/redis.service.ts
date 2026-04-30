@@ -8,29 +8,30 @@ export class RedisService implements OnModuleInit {
   constructor() {
     const redisUrl = process.env.REDIS_URL;
     
-    // Debug log to verify if Railway is passing the variable
-    console.log('Checking REDIS_URL:', redisUrl ? 'Found ✅' : 'Not Found ❌');
+    console.log('🔍 REDIS_URL Check:');
+    console.log('  Value:', redisUrl);
+    console.log('  Is defined:', redisUrl !== undefined);
+    console.log('  Is empty string:', redisUrl === '');
+    console.log('  Length:', redisUrl?.length || 0);
 
-    if (!redisUrl) {
-      throw new Error('REDIS_URL environment variable is missing!');
+    if (!redisUrl || redisUrl.trim() === '') {
+      console.error('❌ REDIS_URL is missing or empty!');
+      throw new Error('REDIS_URL environment variable is missing or empty!');
     }
 
-    this.client = createClient({
-      url: redisUrl,
-    });
+    this.client = createClient({ url: redisUrl });
 
     this.client.on('error', (err) => console.error('Redis Client Error:', err));
+    this.client.on('connect', () => console.log('✅ Redis Connected'));
   }
 
   async onModuleInit() {
     try {
-      console.log('Connecting to Redis...');
+      console.log('⏳ Connecting to Redis...');
       await this.client.connect();
-      console.log('Redis Connected Successfully! ');
+      console.log('🎉 Redis Connected Successfully!');
     } catch (error) {
-      console.error('Failed to connect to Redis:', error.message);
-      // Throw error to crash the app if Redis fails (better than running broken)
-      throw error; 
+      throw error;
     }
   }
 
